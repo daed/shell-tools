@@ -1,0 +1,47 @@
+#!/bin/bash
+
+DELAY=0
+DURATION=10
+DIR=$HOME/recordings
+
+function print_usage {
+  echo "Usage: $0 [--window]"
+  echo "       --window: Record the currently focused window instead of the full screen."
+  exit 1
+}
+
+if [[ "$1" == "--help" ]]; then
+  print_usage
+fi
+
+mkdir -p $DIR
+cd $DIR
+
+# If --window flag is provided
+if [[ $1 == '--window' ]]; then
+  # Get the id of the currently focused window
+  WINDOW_ID=$(xdotool getwindowfocus)
+
+  # Get the window geometry
+  INFO=$(xwininfo -id $WINDOW_ID)
+
+  # Extract details
+  X=$(echo "${INFO}" | awk -F: '/Absolute upper-left X/{print $2}' | tr -d ' ')
+  Y=$(echo "${INFO}" | awk -F: '/Absolute upper-left Y/{print $2}' | tr -d ' ')
+  CAPTURE_WIDTH=$(echo "${INFO}" | awk -F: '/Width/{print $2}' | tr -d ' ')
+  CAPTURE_HEIGHT=$(echo "${INFO}" | awk -F: '/Height/{print $2}' | tr -d ' ')
+
+else
+  # Get screen dimensions
+  CAPTURE_WIDTH=$(xdpyinfo | awk -F'[ x]+' '/dimensions:/{print $3}')
+  CAPTURE_HEIGHT=$(xdpyinfo | awk -F'[ x]+' '/dimensions:/{print $4}')
+  X=0
+  Y=0
+fi
+
+# Get current date and time for the filename
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+# Record the screen or window
+byzanz-record -c --verbose --delay=$DELAY --duration=$DURATION --x=$X --y=$Y --width=$CAPTURE_WIDTH --height=$CAPTURE_HEIGHT "${TIMESTAMP}_recording.gif"
+

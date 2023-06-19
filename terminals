@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Calculate the size of each terminal in pixels
+WIDTH=$((2560 / 3))
+HEIGHT=$((1600 / 2))
+
+# Function to kill previous terminals
+kill_terminals() {
+  for i in {0..1}; do
+    for x in $(pgrep -f "terminal_${i}"); do 
+      kill $x
+    done
+  done
+}
+
+# Always kill existing terminals first
+kill_terminals
+
+# Check for --stop flag
+if [[ $1 == '--stop' ]]; then
+  exit 0
+fi
+
+# Open new terminals
+for i in {0..1}; do
+  for j in {0..2}; do
+    xfce4-terminal --disable-server -T "terminal_${i}_${j}" -H &
+  done
+done
+
+# Wait for the windows to be registered
+sleep 2
+
+# Use wmctrl to move and resize the terminals
+for i in {0..1}; do
+  for j in {0..2}; do
+    # Capture its window ID
+    WID=$(wmctrl -l | grep "terminal_${i}_${j}" | awk '{print $1}')
+
+    # Calculate the position for this terminal
+    X=$((j * WIDTH))
+    Y=$((i * HEIGHT))
+
+    # Move and resize the terminal
+    wmctrl -i -r $WID -e 0,$X,$Y,$WIDTH,$HEIGHT
+  done
+done
+

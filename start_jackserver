@@ -1,0 +1,26 @@
+#
+# Jack server startup script
+#
+# This script stops pulseaudio and starts up qjackctl for a Jack server.
+# Once qjackctl is stopped, then the script will automatically restart
+# pulseaudio.  As an added benefit because I am stupid, the script will
+# prevent you from running it as root.
+#
+# cat disclaimer.txt
+#
+
+if [ "$EUID" -eq 0 ]
+  then echo "Please do not run this as root"
+  exit
+fi
+
+pulseaudio --kill
+
+systemctl --user stop pulseaudio.{socket,service}
+systemctl --user disable pulseaudio.{socket,service}
+
+qjackctl
+
+systemctl --user enable pulseaudio.{socket,service}
+systemctl --user start pulseaudio.{socket,service}
+
