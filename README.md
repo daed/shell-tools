@@ -24,7 +24,7 @@ The script uses the following programs, which must be installed on your system:
 You can run the script with the following command:
 
 ```bash
-./record_screen.sh [--window]
+./screenrip [--window]
 ```
 
 By default, the script records the entire screen. If you want to record the currently focused window instead, provide the `--window` flag.
@@ -108,6 +108,7 @@ The script requires the following programs to be installed on your system:
 
 - `xfce4-terminal`
 - `wmctrl`
+- `xdpyinfo`
 
 ## Installation
 
